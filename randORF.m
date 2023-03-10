@@ -11,16 +11,10 @@ utr_orf_len = 45;
 count_ATGS = zeros(1,atg_counter_len);
 
 for i = 1:size(T,1)
-        
     orf = char(T{i,"ORF_1"});
     utr5 = char(T{i,"UTR_5"});
     utr5_len_orig = T{i,"UTR5_LEN_ORIG"};
-
-    if length(utr5) > utr_orf_len
-        utr5 = utr5(length(utr5)-utr_orf_len+1:end);
-    end
-
-    count_ATGS = countATGInString(utr5, orf, count_ATGS);
+    count_ATGS = countATGInString(utr5, orf, utr5_len_orig, 45, count_ATGS);
 end
 
 variablesTypes = repmat({'double'}, 1, atg_counter_len);
@@ -29,7 +23,7 @@ randUTRandORFTable = table('Size',[sample_size atg_counter_len], 'VariableTypes'
 count_rands_high_ATG = zeros(1,atg_counter_len);
 count_rands_low_ATG = zeros(1,atg_counter_len);
 
-for rand_count = 1:sample_size
+for rand_count = 1:20
     count_ATGS_rand = zeros(1,atg_counter_len);
     for i = 1:size(T,1)
         
@@ -42,8 +36,12 @@ for rand_count = 1:sample_size
             utr5 = utr5(length(utr5)-utr_orf_len+1:end);
         end
         utr5_rand_sample = get_random_utr(utr5);
+
+        orf = char(T{i,"ORF_1"});
+        utr5 = char(T{i,"UTR_5"});
+        utr5_len_orig = T{i,"UTR5_LEN_ORIG"};
         
-        count_ATGS_rand = countATGInString(utr5_rand_sample, orf_rand_sample, count_ATGS_rand);
+        count_ATGS_rand = countATGInString(utr5_rand_sample, orf_rand_sample,  utr5_len_orig, 45, count_ATGS_rand);
         T.RAND_ORF_D{i} = orf_rand_sample;
     
     end
@@ -176,7 +174,6 @@ function rand_orf = get_random_orf(orf, aa_to_codon)
     end
 end
 
-
 function ran_utr = get_random_utr(utr)
     n = length(utr);
     %generate a random permutation of the indices
@@ -184,25 +181,42 @@ function ran_utr = get_random_utr(utr)
     ran_utr = utr(idx);
 end
 
-function count_ATGS = countATGInString(utr5, orf, count_ATGS)
 
-    utr_orf_len = 45;
-    offset_len = 0;
-    if length(utr5) < utr_orf_len
-        offset_len = utr_orf_len - length(utr5);
+function count_ATGS = countATGsUTR5(utr5, utr5_len_orig, max_length)
+        
+    count_ATGS = zeros(1, max_length);
+    if isnan(utr5_len_orig) 
+        return;
     end
-
-    utr5_and_orf = strcat(utr5, orf(1:min(end,51)));
-    k = strfind(utr5_and_orf,"ATG");
+    offset_len = 0;
+    if length(utr5) < max_length
+        offset_len = max_length - length(utr5);
+    elseif length(utr5) > max_length
+        %concatenate utr5 to take only the last max_length chars
+        utr5 = utr5(length(utr5)-max_length+1:end);
+    end 
+    
+    k = strfind(utr5,"ATG");
     for j=1:numel(k)
         atg_loc = k(j) + offset_len;
-        if atg_loc > 95
-            disp("Loc 96" + utr5);
-            disp(orf);
-            disp(atg_loc);
-            disp(k(j));
-            continue;
-        end
         count_ATGS(atg_loc) = count_ATGS(atg_loc) + 1;
     end
 end
+
+
+function count_ATGS = countATGInORF(orf, max_length)
+    count_ATGS = zeros(1, max_length);    
+    orf = orf(1:min(end,max_length));
+    k = strfind(orf,"ATG");
+    count_ATGS(k) = count_ATGS(k) + 1;    
+end
+
+function count_ATGS = countATGInString(utr5, orf, utr5_len_orig, max_length, count_ATGS)
+
+    count_ATGs_UTR5 = countATGsUTR5(utr5, utr5_len_orig, max_length);
+    count_ATGs_ORF = countATGInORF(orf, max_length + 6);
+    count_ATGS_new = [count_ATGs_UTR5 count_ATGs_ORF];
+    
+    count_ATGS = count_ATGS + count_ATGS_new;
+end
+

@@ -22,8 +22,6 @@ for i = 1:size(T,1)
     
     count_ATGS = countATGInString(utr5, orf, count_ATGS);
     count_ATGS_rand = countATGInString(utr5_rand, orf_rand, count_ATGS_rand);
-
-
 end
 
 figure;

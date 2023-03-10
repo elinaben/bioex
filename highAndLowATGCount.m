@@ -30,19 +30,25 @@ end
 
 figure;
 A = [count_ATGS_high_PA(1:3:end); count_ATGS_low_PA(1:3:end)]';
-barColorMap = [0 0 0; 1 1 0];  
-%barColorMap(2,:) = [.9 .9 .14];  % Yellow Color for segment 2.
-colormap(barColorMap);
 
-bar(log2(A), 'BarWidth', 0.8);
+bar(log2(A), 'BarWidth', 1);
+h = get(gca, "Children");
+set(h(1), 'FaceColor','g');
+set(h(2), 'FaceColor', 'r');
 
 figure;
 B = [count_ATGS_high_PA(2:3:end); count_ATGS_low_PA(2:3:end)]';
-bar(B, 'BarWidth', 0.8);
+bar(B, 'BarWidth', 1);
+h = get(gca, "Children");
+set(h(1), 'FaceColor','g');
+set(h(2), 'FaceColor', 'r');
 
 figure;
 C = [count_ATGS_high_PA(3:3:end); count_ATGS_low_PA(3:3:end)]';
-bar(C, 'BarWidth', 0.8);
+bar(C, 'BarWidth', 1);
+h = get(gca, "Children");
+set(h(1), 'FaceColor','g');
+set(h(2), 'FaceColor', 'r');
 
 function count_ATGS = countATGInString(utr5, orf, count_ATGS)
 
