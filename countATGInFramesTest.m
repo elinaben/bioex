@@ -13,7 +13,7 @@ classdef countATGInFramesTest < matlab.unittest.TestCase
             orf = "ATGGGAACATTAATGGTAGTA";
             utr5 = "GTGGGAACATTAATGGTAGTA";
             % Call function under test
-            result = countATGInString(utr5, orf, count_ATGS)
+            result = countATGInFrames(utr5, orf, length(utr5), max_length, count_ATGS)
             
             % Verify output
             testCase.verifyEqual(result, expected);
