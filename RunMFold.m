@@ -6,7 +6,7 @@ max_length = 80;
 ORF_SIZE = 550;
 
 folding_energy_array = zeros(size(T,1), SLIDING_WINDOW_SIZE + ORF_SIZE);
-for i = 1:size(T,1)
+for i = size(T,1):-1:1130
     disp(i);
     orf = char(T{i,"ORF_1"});
     utr5 = char(T{i,"UTR_5"});
@@ -27,7 +27,7 @@ for i = 1:size(T,1)
     if mod(i,10) == 0
         disp("writing...");
         file_name = sprintf('folding_energy_%d.csv', i);
-        csvwrite(file_name,folding_energy_array(1:i,:));
+        csvwrite(file_name,folding_energy_array(i:size(T,1),:));
     end
 end
 

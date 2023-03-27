@@ -8,7 +8,7 @@ max_length = 80;
 ORF_SIZE = 550;
 
 folding_energy_array = zeros(size(T,1), SLIDING_WINDOW_SIZE + ORF_SIZE);
-for i = 1:size(T,1)
+for i = size(T,1)-1:-1:630
     disp(i);
     orf = char(T{i,"ORF_1"});
 	orf_rand_sample = getRandORF(orf, aa_to_codon);
@@ -30,7 +30,7 @@ for i = 1:size(T,1)
     
     if mod(i,10) == 0
         disp("writing...");
-        csvwrite('folding_energy_random.csv',folding_energy_array(1:i,:));
+        csvwrite('folding_energy_random.csv',folding_energy_array(i:size(T,1)-1,:));
     end
 end
 
