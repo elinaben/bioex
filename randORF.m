@@ -4,7 +4,7 @@ T = readtable("yeast_parameters_table_with_diff_5utr.xls");
 [aa_to_codon, codon_to_aa] = get_aa_to_codon_map();
 
 sample_size = 20;
-atg_counter_len = 96;
+atg_counter_len = 90;
 utr_orf_len = 45;
 
 %use same loop to:
@@ -28,17 +28,15 @@ for rand_count = 1:20
     for i = 1:size(T,1)
         
         orf = char(T{i,"ORF_1"});
-        orf_rand_sample = get_random_orf(orf, aa_to_codon);
+        orf_rand_sample = getRandORF(orf, aa_to_codon);
 
         utr5 = char(T{i,"UTR_5"});
         
         if length(utr5) > utr_orf_len
             utr5 = utr5(length(utr5)-utr_orf_len+1:end);
         end
-        utr5_rand_sample = get_random_utr(utr5);
+        utr5_rand_sample = getRandUTR(utr5);
 
-        orf = char(T{i,"ORF_1"});
-        utr5 = char(T{i,"UTR_5"});
         utr5_len_orig = T{i,"UTR5_LEN_ORIG"};
         
         count_ATGS_rand = countATGInFrames(utr5_rand_sample, orf_rand_sample,  utr5_len_orig, 45, count_ATGS_rand);
@@ -145,40 +143,5 @@ function [aa_to_codon, codon_to_aa] = get_aa_to_codon_map()
     
 end
 
-function rand_orf = get_random_orf(orf, aa_to_codon)
-    
-    aa_keys = keys(aa_to_codon);
-    rand_orf = orf(1:min(90,length(orf)));
-    for j = 1:numel(aa_keys)
-        codons = aa_to_codon(char(aa_keys(j)));
-        idxes = [];
-        for k=1:numel(codons)
-            codon_idxes = strfind(orf, codons(k));
-            codon_idxes = codon_idxes(mod(codon_idxes,3) == 1);
-            idxes = [idxes, codon_idxes];
-        end
-
-        %generate a random permutation of the indices
-        perm_idxes = randperm(length(idxes));
-        idxes_after_perm = idxes(perm_idxes);
-
-        for k=1:numel(idxes_after_perm)
-            pre_idx = idxes(k);
-            new_idx = idxes_after_perm(k);
-            if strcmp(orf(pre_idx:pre_idx+2), orf(new_idx:new_idx+2)) == 0
-                if mod(pre_idx-1,3) == 0 % 
-                    rand_orf(new_idx:new_idx+2) = orf(pre_idx:pre_idx+2);
-                end
-            end
-        end
-    end
-end
-
-function ran_utr = get_random_utr(utr)
-    n = length(utr);
-    %generate a random permutation of the indices
-    idx = randperm(n);
-    ran_utr = utr(idx);
-end
 
 
