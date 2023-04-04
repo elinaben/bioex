@@ -20,8 +20,8 @@ function rand_orf = getRandomORF(orf, aa_to_codon)
             new_idx = idxes_after_perm(k);
             pre_codon = orf(pre_idx:pre_idx+2);
             new_codon = orf(new_idx:new_idx+2);
-            if strcmp(pre_codon, new_codon) == 0
-                rand_orf(new_idx:new_idx+2) = new_codon;
+            if ~strcmp(pre_codon, new_codon)
+                rand_orf = [rand_orf(1:pre_idx-1) new_codon rand_orf(pre_idx+3:end)];
             end
         end
     end

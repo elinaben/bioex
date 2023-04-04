@@ -4,25 +4,35 @@ T = readtable("yeast_parameters_table_with_diff_5utr.xls");
 [aa_to_codon, codon_to_aa] = get_aa_to_codon_map();
 
 SLIDING_WINDOW_SIZE = 40;
-max_length = 80;
+MAX_LEN_UTR5 = 23;
 ORF_SIZE = 550;
-
-folding_energy_array = zeros(size(T,1), SLIDING_WINDOW_SIZE + ORF_SIZE);
-for i = size(T,1)-1:-1:630
+% 
+% folding_energy_array = zeros(size(T,1), MAX_LEN_UTR5 + ORF_SIZE);
+% T_results = readmatrix("folding_energy_random_utr5_30_03.csv");
+% for i = 1:size(T_results,1)%for i = size(T,1)-1:-1:630
+%     folding_energy_array(i,:) = T_results(i,:);
+% end
+% 
+% for i = size(T_results,1)+1:size(T,1)%-1:-1:630
+for i = size(T,1):-1:1
     disp(i);
     orf = char(T{i,"ORF_1"});
 	orf_rand_sample = getRandORF(orf, aa_to_codon);
     utr5 = char(T{i,"UTR_5"});
     utr5_len_orig = T{i,"UTR5_LEN_ORIG"};
+    
     offset = 1;
-    if length(utr5) < max_length
-        offset = max_length - length(utr5) + 1;
-    elseif length(utr5) > max_length
+    if length(utr5) < MAX_LEN_UTR5
+        offset = MAX_LEN_UTR5 - length(utr5) + 1;
+    elseif length(utr5) > MAX_LEN_UTR5
         %concatenate utr5 to take only the last max_length chars
-        utr5 = utr5(length(utr5)-max_length+1:end);
+        utr5 = utr5(length(utr5)-MAX_LEN_UTR5+1:end);
     end
-    utr5_rand_sample = getRandUTR(utr5);
-
+    utr5_rand_sample = getRandUTR(utr5);   
+    if strcmp(orf, orf_rand_sample)
+        disp("identical 2")
+    end
+        
     full_sequence = strcat(utr5_rand_sample,orf_rand_sample(1:min(end,ORF_SIZE)));
     disp(full_sequence);
     folding_energy_result = runMFold(full_sequence, SLIDING_WINDOW_SIZE);
@@ -30,7 +40,7 @@ for i = size(T,1)-1:-1:630
     
     if mod(i,10) == 0
         disp("writing...");
-        csvwrite('folding_energy_random.csv',folding_energy_array(i:size(T,1)-1,:));
+        csvwrite('folding_energy_random_bioinformatics_2.csv',folding_energy_array(i:size(T,1),:));
     end
 end
 
@@ -65,12 +75,11 @@ function folding_energy_array = runMFold(orf, sliding_window_size)
     
     for j=1:length(orf)
         sequence = orf(j:min(j+sliding_window_size,length(orf)));
-        command = sprintf('echo "%s" | RNAfold ', sequence);
-        [result, folding_energy] = system(command);
-        
-        
-        num = extract_last_parenthesis_number(folding_energy);
-        folding_energy_array(j) = num;
+        %command = sprintf('echo "%s" | RNAfold ', sequence);
+        %[result, folding_energy] = system(command);
+        [RNAbracket, Energy] = rnafold(sequence);
+                
+        folding_energy_array(j) = Energy;
     end
 end
 
