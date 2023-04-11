@@ -7,7 +7,7 @@ SLIDING_WINDOW_SIZE = 40;
 MAX_LEN_UTR5 = 23;
 ORF_SIZE = 550;
 % 
-% folding_energy_array = zeros(size(T,1), MAX_LEN_UTR5 + ORF_SIZE);
+folding_energy_array = zeros(size(T,1), MAX_LEN_UTR5 + ORF_SIZE);
 % T_results = readmatrix("folding_energy_random_utr5_30_03.csv");
 % for i = 1:size(T_results,1)%for i = size(T,1)-1:-1:630
 %     folding_energy_array(i,:) = T_results(i,:);
